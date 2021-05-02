@@ -21,6 +21,10 @@ public class Main extends Application {
         boolean endOfSession = false;
         String userInput;
 
+        int balance;
+        int decouvert;
+        String name;
+
         // Loop
         while (!endOfSession) {
 
@@ -41,10 +45,53 @@ public class Main extends Application {
                     endOfSession = true;
                     b.closeDb();
                     break;
-                // TODO
+                case "0":
+                    b.printAllAccounts();
+                    break;
+
+
+                case "1":
+                    System.out.println("\nEnter name for the account : ");
+                    name = s.nextLine();
+
+                    System.out.println("\nEnter balance for the account : ");
+                    balance = s.nextInt();
+                    if(balance < 0){
+                        System.out.print("You have to enter a positive balance");
+                        break;
+                    }
+
+                    System.out.println("\nEnter decouvert for the account : ");
+                    decouvert = s.nextInt();
+                    if(decouvert > 0){
+                        System.out.print("Your decouvert have to be negative");
+                        break;
+                    }
+
+                    b.createNewAccount(name,balance,decouvert);
+                    break;
+
+                case "2":
+                    System.out.println("\nEnter the name of the account you want change the balance: ");
+                    name = s.nextLine();
+
+                    System.out.println("\nEnter the new balance : ");
+                    balance = s.nextInt();
+                    if(balance < 0){
+                        System.out.print("You have to enter a positive balance");
+                        break;
+                    }
+
+                    b.changeBalanceByName(name,balance);
+                    break;
+
+                case "3":
+                    System.out.println("\nEnter the name of the account you want block : ");
+                    name = s.nextLine();
+
+                    b.blockAccount(name);
+                    break;
             }
         }
-
     }
 }
-
