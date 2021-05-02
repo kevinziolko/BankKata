@@ -2,25 +2,36 @@ package bank;
 
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Bank {
 
+    private ArrayList<Account> user = new ArrayList<>();
+    private Integer i;
+    
+    private ResultSet query(String sql) {
+        return query(sql, null);
+    }
+
+    private ResultSet query(String sql, Object o) {
+    }
+
     /*
         Strings de connection à la base postgres
      */
-    private static final String JDBC_DRIVER = "org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5439/postgres";
-    private static final String DB_USER = "postgres";
+   // private static final String JDBC_DRIVER = "org.postgresql.Driver";
+   // private static final String DB_URL = "jdbc:postgresql://localhost:5439/postgres";
+   // private static final String DB_USER = "postgres";
 
     /*
         Strings de connection à la base mysql, à décommenter et compléter avec votre nom de bdd et de user
      */
-    // private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    // private static final String DB_URL = "jdbc:mysql://localhost:3306/bank_db";
-    // private static final String DB_USER = "bank_user";
+     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+     private static final String DB_URL = "jdbc:mysql://localhost:3308/bank_db";
+     private static final String DB_USER = "root";
 
-    private static final String DB_PASS = "1234";
+    private static final String DB_PASS = "root";
 
     private static final String TABLE_NAME = "accounts";
 
@@ -28,8 +39,6 @@ public class Bank {
 
     public Bank() {
         initDb();
-
-        // TODO
     }
 
     private void initDb() {
@@ -40,6 +49,7 @@ public class Bank {
 
             // TODO Init DB
 
+            query("CREATE TABLE accounts(name VARCHAR(255), balance FLOAT, decouvert INTEGER, block BOOLEAN DEFAULT 'false')");
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -67,26 +77,75 @@ public class Bank {
     }
 
 
-    public void createNewAccount(String name, int balance, int threshold) {
+    public void createNewAccount(String name, int balance, int decouvert) {
         // TODO
+
+        if(decouvert <= 0){
+            Account newAccount = new Account();
+            newAccount.setName(name);
+            newAccount.setDecouvert(decouvert);
+            newAccount.setBalance(balance);
+            user.add(newAccount);
+            try (Statement s = c.createStatement()){
+
+                char status;
+                if(newAccount.isBlock() == false){
+                    status = 'f';
+                }else{
+                    status = 't';
+                }
+
+                s.executeUpdate("INSERT INTO " + TABLE_NAME + " (name, balance,decouvert,block) VALUES ("
+                        + "'" + newAccount.getName() + "' , "
+                        +  newAccount.getBalance() + " , "
+                        +  newAccount.getDecouvert() + " ,"
+                        + "'" + status + "');");
+                System.out.println("Account created");
+            }catch(Exception e){
+                System.out.println(e.toString());
+            }
+        }else{
+            return;
+        }
     }
+    }
+
 
     public String printAllAccounts() {
         // TODO
+        String AllAccounts = "";
+        ResultSet q;
 
-        return "";
+        q = query("SELECT name, balance, decouvert, block FROM accounts");
+        String name = q.getString(1);
+        int balance = q.getInt(2);
+        int decouvert = q.getInt(3);
+        boolean block = q.getBoolean(4);
+        AllAccounts += new Account(name, balance, decouvert, block).toString() + "\n";
+
+        return AllAccounts();
     }
+
+
 
     public void changeBalanceByName(String name, int balanceModifier) {
         // TODO
+        ArrayList<Object> account = new ArrayList<Object>()
+        account.add(name);
+        account.add(balanceModifier);
+
+        query("UPDATE accounts SET balance = balanceModifier WHERE name");
     }
 
     public void blockAccount(String name) {
         // TODO
+            ArrayList<Object> account = new ArrayList<Object>();
+            account.add(name);
+            query("UPDATE accounts SET block = 'true' WHERE name = name");
     }
 
     // For testing purpose
-    String getTableDump() {
+    String getTableDump(){
         String query = "select * from " + TABLE_NAME;
         String res = "";
 
@@ -114,3 +173,4 @@ public class Bank {
         return res;
     }
 }
+
